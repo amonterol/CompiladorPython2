@@ -66,7 +66,7 @@ public class PalabraReservada {
     
     
     
-    public boolean verificarPalabraReservadaEnLista(String palabra) {
+    public boolean esPalabraReservada(String palabra) {
         return  palabrasReservadas.contains(palabra);
     }
     

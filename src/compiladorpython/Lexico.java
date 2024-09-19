@@ -18,6 +18,7 @@ import utilitarios.Archivo;
 import utilitarios.Error;
 import utilitarios.TipoDeToken;
 import utilitarios.Token;
+import utilitarios.PalabraReservada;
 
 /**
  *
@@ -200,6 +201,74 @@ public class Lexico {
                     break;
 
                 default:
+                    PalabraReservada palabraReservada = new PalabraReservada();
+                    if (esDigito(caracterActual)) {
+                        boolean decimal = false;
+                        numero = numero.trim() + caracterActual;
+                        System.out.println("5 ESTE ES NUMERO " + numero.trim() + " " + i);
+                        caracterSiguiente = arregloCaracteres[++i];
+                        if (i < arregloCaracteres.length) {
+                            while (i < arregloCaracteres.length && caracterSiguiente != ' ') {
+                                caracterSiguiente = arregloCaracteres[i];
+                                if (esDigito(caracterSiguiente)) {
+                                    numero = numero + caracterSiguiente;
+
+                                } else if (caracterSiguiente == '.') {
+                                    numero = numero + caracterSiguiente;
+                                    decimal = true;
+
+                                } else {
+                                    numero = " ";
+                                    break;
+                                }
+
+                                ++i;
+                                System.out.println("5 ESTE ES NUMERO " + numero.trim() + " " + i);
+
+                            }
+                            if (decimal) {
+                                agregarNuevoToken("Numero", TipoDeToken.NUMERO_REAL.toString(), numero.trim(), numeroLinea);
+                            } else {
+                                agregarNuevoToken("Numero", TipoDeToken.NUMERO_ENTERO.toString(), numero.trim(), numeroLinea);
+                            }
+                            caracterSiguiente = ' ';
+                            caracterActual = ' ';
+                        }
+                        System.out.println("4 ESTE ES NUMERO " + numero.trim() + " " + i);
+                        --i;
+                        numero = " ";
+                        break;
+                    } else if (esLetra(caracterActual)) {
+               
+                        while (!esFinalLinea(arregloCaracteres, i) && caracterActual != ' ') {
+
+                            caracterActual = arregloCaracteres[i];
+                            if (caracterActual == '.' || caracterActual == '(' || caracterActual == ')') {
+                                break;
+                            }
+
+                            identificador = identificador + caracterActual;
+                            //System.out.println("322 AnalisisLexico> Valor de i = " + i + " " + arregloCaracteres.length + " " + esFinalLinea(arregloCaracteres, i)+ "\n");//BORRAR
+                            ++i;
+                        }
+
+                        if (palabraReservada.esPalabraReservada(identificador.trim())) {
+                            System.out.println("517 Analisis sintactico> Encontro palabra reservada");
+                            agregarNuevoToken(identificador.trim(), TipoDeToken.PALABRA_RESERVADA.toString(), null , numeroLinea);
+                        } else {
+                            System.out.println("520 Analisis sintactico> No Encontro palabra reservada");
+                            agregarNuevoToken(identificador.trim(), TipoDeToken.IDENTIFICADOR.toString(), null, numeroLinea);
+                        }
+
+                        //System.out.println("4 ESTE ES EL IDENTIFICADOR " + identificador.trim() + " " + i);
+                        --i;
+                        identificador = " ";
+                        break;
+
+                    } else {
+                        agregarNuevoToken(String.valueOf(caracterActual), TipoDeToken.DESCONOCIDO.toString(), null, numeroLinea);
+                        break;
+                    }
                     
 
             }
@@ -216,6 +285,20 @@ public class Lexico {
         Token nuevoToken = new Token(nombreToken, tipoDeToken, valor, numeroLinea);
 
         listaDeTokens.add(nuevoToken);
+    }
+    
+    private static boolean esLetra(char c) {
+        return (c >= 'a' && c <= 'z')
+                || (c >= 'A' && c <= 'Z')
+                || c == '_';
+    }
+
+    private static boolean esDigito(char c) {
+        return c >= '0' && c <= '9';
+    }
+
+    private static boolean esAlfaNumerico(char c) {
+        return esLetra(c) || esDigito(c);
     }
 
 }
