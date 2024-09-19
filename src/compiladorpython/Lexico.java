@@ -35,6 +35,7 @@ public class Lexico {
     public static boolean nombreDeProgramaEsIdentificadorValido = true;
 
     public static int numeroLineaActual = 1;
+    public static int cantidadComentarios = 0;
 
     private static List<Token> listaDeTokens;
     private static List<String> listaCodigoAnalizado; //Incluye los errores detectados
@@ -79,13 +80,11 @@ public class Lexico {
                         listaDeTokens = new ArrayList<>();
                         for (String lineaDeCodigo : contenidoArchivo) {
 
-                            //System.out.println("\n2.- INICIO LINEA DE CODIGO"); //BORRAR
-                            //System.out.println(lineaDeCodigo); //BORRAR
-                            //System.out.println("\n2.- FIN LINEA DE CODIGO"); //BORRAR
+                          
                             
                             if (lineaDeCodigo.isBlank() || lineaDeCodigo.isEmpty()) {
                                 System.out.println("\n 90 BORRAR ES UN NUEVA LINEA DE CODIGO ESTA EN BLANCO " + lineaDeCodigo); 
-                                agregarNuevoToken("linea en blanco", TipoDeToken.LINEA_EN_BLANC0.toString(), null, numeroLineaActual);
+                                agregarNuevoToken(null, TipoDeToken.LINEA_EN_BLANC0.toString(), null, numeroLineaActual);
                                 System.out.println("\n 90 BORRAR ES UN NUEVA LINEA DE CODIGO ESTA EN BLANCO " + numeroLineaActual); 
                             } else {
                                 // System.out.println("\n4.-.- BORRAR> INICIO LINEA DE CODIGO CONVERTIDA A CARACTERES  " + lineaDeCodigo);
@@ -120,6 +119,8 @@ public class Lexico {
                         listaDeTokens.forEach((item) -> {
                             System.out.println(item.getLexema() + " " + item.getTipoDeToken() + " " + item.getValor() + " " + item.getLinea());
                         });
+                        
+         System.out.println("\n\n<<<NUMERO DE COMENTARIOS>>> " + cantidadComentarios);                
 
     }
 
@@ -170,9 +171,8 @@ public class Lexico {
         String comentario = "";
         String numero = "";
 
-        int[] estadisticas = new int[10];
-
-        int cantidadComentarios = 0;
+      
+       
 
         for (int i = 0; i < arregloCaracteres.length; i++) {
 
@@ -187,7 +187,7 @@ public class Lexico {
                         ++i;
                     }
                     System.out.println("138 BORRAR>  El comentario es: " + comentario + "\n");//BORRAR
-                   
+                   agregarNuevoToken(null, TipoDeToken.COMENTARIO_UNA_LINEA.toString(), comentario.trim(), numeroLinea);
                     ++cantidadComentarios;
                     comentario = " ";
                     --i;
@@ -200,7 +200,7 @@ public class Lexico {
                     break;
 
                 default:
-                    break;
+                    
 
             }
 
