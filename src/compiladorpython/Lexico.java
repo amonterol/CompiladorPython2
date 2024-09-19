@@ -4,8 +4,16 @@
  */
 package compiladorpython;
 
-
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileReader;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 import javax.swing.JOptionPane;
+import utilitarios.Archivo;
 import utilitarios.Error;
 
 /**
@@ -19,7 +27,6 @@ public class Lexico {
     private String[] args = null;
     //Se usa para construir el archivo de salida cuando se ha terminado el análisis léxico
     private static String archivoAdjunto = "";
-  
 
     public static String nombreDePrograma = " ";
     public static boolean nombreDeProgramaEsIdentificadorValido = true;
@@ -28,7 +35,7 @@ public class Lexico {
         this.args = args;
     }
 
-    public void analizarPrograma() {
+    public void analizarPrograma() throws IOException {
 
         //Valida si se adjunta un único archivo con código fuente al programa
         if (validarExistenciaArchivoInicial(this.args)) {
@@ -43,6 +50,30 @@ public class Lexico {
             } else {
                 String nombrePrograma = archivoAdjunto.substring(0, archivoAdjunto.indexOf('.'));
                 System.out.println(" 47 BORRAR: ESTE ES EL NOMBRE DEL PROGRAM SI SU EXTENSION " + nombrePrograma + " " + archivoAdjunto);
+                
+                /*
+                List<String> contenidoArchivo = leerContenidoArchivoAdjunto(archivoAdjunto);
+                imprimirListas(contenidoArchivo);
+                
+                String nombreArchivo = "salida.txt";
+                escribirArchivo(contenidoArchivo, nombreArchivo);
+                */
+                
+                Archivo archivo = new Archivo();
+                List<String> contenidoArchivo = archivo.leerArchivo(archivoAdjunto);
+                System.out.println("\n" + "64 BORRAR: ESTE ES EL CONTENIDO DEL ARCHIVO GATO.PY" + "\n");
+                        
+                imprimirListas(contenidoArchivo);
+                
+                
+                String nombreArchivo = "salida.txt";
+                archivo.escribirArchivo(contenidoArchivo, nombreArchivo);
+                
+                System.out.println("\n" + " 72 BORRAR: ESTE ES EL CONTENIDO DEL ARCHIVO SALIDA.TXT" + "\n");
+                archivo.imprimirArchivo(nombreArchivo);
+                 
+                
+            
             }
         } else {
             System.exit(0);
@@ -78,5 +109,20 @@ public class Lexico {
             return true;
         }
 
+    }
+
+ 
+    
+    public void imprimirListas(List<String> contenidoArchivo) {
+        /*
+        Iterator iter = lista.iterator();
+
+        while (iter.hasNext()) {
+            System.out.print(iter.next());
+        }
+        */
+        for (String linea : contenidoArchivo) {
+            System.out.println(linea);
+        }
     }
 }
