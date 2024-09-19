@@ -13,6 +13,8 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.StringTokenizer;
+import java.util.regex.Pattern;
 import javax.swing.JOptionPane;
 import utilitarios.Archivo;
 import utilitarios.Error;
@@ -88,19 +90,39 @@ public class Lexico {
                                 agregarNuevoToken(null, TipoDeToken.LINEA_EN_BLANC0.toString(), null, numeroLineaActual);
                                 System.out.println("\n 90 BORRAR ES UN NUEVA LINEA DE CODIGO ESTA EN BLANCO " + numeroLineaActual); 
                             } else {
-                                // System.out.println("\n4.-.- BORRAR> INICIO LINEA DE CODIGO CONVERTIDA A CARACTERES  " + lineaDeCodigo);
-                                char[] arregloCaracteres = lineaDeCodigo.toCharArray();
-                                // iterar sobre la array `char[]` usando for-loop mejorado
-                                for (char ch : arregloCaracteres) {
-                                    System.out.print(ch);
-                                    System.out.print(" ");
+                                
+                                
+                                 if (existeComentario(lineaDeCodigo)) {
+                                    int indice = lineaDeCodigo.indexOf("#");
+                                    System.out.println("la posicion es " + indice);
+                                    if (indice == 0) {
+                                        ++cantidadComentarios;
+                                    } else {
+                                        System.out.println("---------");
+                                        Pattern pattern = Pattern.compile("#");
+                                        String[] strings = pattern.split(lineaDeCodigo);
+                                        for (String s : strings) {
+                                            System.out.println(s.trim());
+                                        }
+                                        ++cantidadComentarios;
+
+                                    }
+                                    System.out.println(cantidadComentarios + " lineas de comentarios");
+                                } else {
+
+                                    List<String> linea = new ArrayList();
+
+                                    StringTokenizer st = new StringTokenizer(lineaDeCodigo);
+                                    System.out.println("NUEVA LINEA DE CODIGO # ");
+                                    while (st.hasMoreTokens()) {
+                                        String str = st.nextToken();
+                                        linea.add(str);
+                                    }
+
+                                    System.out.println("LINEA DE CODIGO CONVERTIDA A LISTA DE TOKENS BASICOS ");
+                                    imprimirListas(linea);
+
                                 }
-                                System.out.println(" ");
-
-                                analisisLexico(arregloCaracteres, numeroLineaActual);
-
-                                // numeroDeLineaActual++;
-                                // System.out.println("\n4.-.- BORRAR> FIN LINEA DE CODIGO CONVERTIDA A CARACTERES  " + lineaDeCodigo);
                             }
                             ++numeroLineaActual; //Aumenta con cada linea que es analizada
                         }
@@ -164,117 +186,7 @@ public class Lexico {
         }
     }
 
-    public void analisisLexico(char[] arregloCaracteres, int numeroLinea) {
-        char caracterActual = ' ';
-        char caracterSiguiente = ' ';
-        String identificador = "";
-        String str = "";
-        String comentario = "";
-        String numero = "";
-
-      
-       
-
-        for (int i = 0; i < arregloCaracteres.length; i++) {
-
-            caracterActual = arregloCaracteres[i];
-            switch (caracterActual) {
-                //Comentarios de una línea
-                case '#':
-
-                    while (!esFinalLinea(arregloCaracteres, i)) {
-                        caracterActual = arregloCaracteres[i];
-                        comentario = comentario + caracterActual;
-                        ++i;
-                    }
-                    System.out.println("138 BORRAR>  El comentario es: " + comentario + "\n");//BORRAR
-                   agregarNuevoToken(null, TipoDeToken.COMENTARIO_UNA_LINEA.toString(), comentario.trim(), numeroLinea);
-                    ++cantidadComentarios;
-                    comentario = " ";
-                    --i;
-                    break;
-
-                // SE IGNORAN LOS CARACTERES EN BLANCO
-                case ' ':
-                case '\r':
-                case '\t':
-                    break;
-
-                default:
-                    PalabraReservada palabraReservada = new PalabraReservada();
-                    if (esDigito(caracterActual)) {
-                        boolean decimal = false;
-                        numero = numero.trim() + caracterActual;
-                        System.out.println("5 ESTE ES NUMERO " + numero.trim() + " " + i);
-                        caracterSiguiente = arregloCaracteres[++i];
-                        if (i < arregloCaracteres.length) {
-                            while (i < arregloCaracteres.length && caracterSiguiente != ' ') {
-                                caracterSiguiente = arregloCaracteres[i];
-                                if (esDigito(caracterSiguiente)) {
-                                    numero = numero + caracterSiguiente;
-
-                                } else if (caracterSiguiente == '.') {
-                                    numero = numero + caracterSiguiente;
-                                    decimal = true;
-
-                                } else {
-                                    numero = " ";
-                                    break;
-                                }
-
-                                ++i;
-                                System.out.println("5 ESTE ES NUMERO " + numero.trim() + " " + i);
-
-                            }
-                            if (decimal) {
-                                agregarNuevoToken("Numero", TipoDeToken.NUMERO_REAL.toString(), numero.trim(), numeroLinea);
-                            } else {
-                                agregarNuevoToken("Numero", TipoDeToken.NUMERO_ENTERO.toString(), numero.trim(), numeroLinea);
-                            }
-                            caracterSiguiente = ' ';
-                            caracterActual = ' ';
-                        }
-                        System.out.println("4 ESTE ES NUMERO " + numero.trim() + " " + i);
-                        --i;
-                        numero = " ";
-                        break;
-                    } else if (esLetra(caracterActual)) {
-               
-                        while (!esFinalLinea(arregloCaracteres, i) && caracterActual != ' ') {
-
-                            caracterActual = arregloCaracteres[i];
-                            if (caracterActual == '.' || caracterActual == '(' || caracterActual == ')') {
-                                break;
-                            }
-
-                            identificador = identificador + caracterActual;
-                            //System.out.println("322 AnalisisLexico> Valor de i = " + i + " " + arregloCaracteres.length + " " + esFinalLinea(arregloCaracteres, i)+ "\n");//BORRAR
-                            ++i;
-                        }
-
-                        if (palabraReservada.esPalabraReservada(identificador.trim())) {
-                            System.out.println("517 Analisis sintactico> Encontro palabra reservada");
-                            agregarNuevoToken(identificador.trim(), TipoDeToken.PALABRA_RESERVADA.toString(), null , numeroLinea);
-                        } else {
-                            System.out.println("520 Analisis sintactico> No Encontro palabra reservada");
-                            agregarNuevoToken(identificador.trim(), TipoDeToken.IDENTIFICADOR.toString(), null, numeroLinea);
-                        }
-
-                        //System.out.println("4 ESTE ES EL IDENTIFICADOR " + identificador.trim() + " " + i);
-                        --i;
-                        identificador = " ";
-                        break;
-
-                    } else {
-                        agregarNuevoToken(String.valueOf(caracterActual), TipoDeToken.DESCONOCIDO.toString(), null, numeroLinea);
-                        break;
-                    }
-                    
-
-            }
-
-        }
-    }
+    
 
     //FUNCIONES AUXILIARES
     public static boolean esFinalLinea(char[] arregloCaracteres, int contador) {
@@ -287,18 +199,14 @@ public class Lexico {
         listaDeTokens.add(nuevoToken);
     }
     
-    private static boolean esLetra(char c) {
-        return (c >= 'a' && c <= 'z')
-                || (c >= 'A' && c <= 'Z')
-                || c == '_';
-    }
+    //Verifica si la linea de codigo que se esta leyendo contiene un comentario
+    public boolean existeComentario(String lineaActual) {
+        Character caracterDeComentario = '#';
 
-    private static boolean esDigito(char c) {
-        return c >= '0' && c <= '9';
-    }
+        System.out.println(" Existe el caracter de comentarios " + lineaActual.contains(String.valueOf(caracterDeComentario)));
+        return lineaActual.contains(String.valueOf(caracterDeComentario));
 
-    private static boolean esAlfaNumerico(char c) {
-        return esLetra(c) || esDigito(c);
     }
-
+    
+    
 }
